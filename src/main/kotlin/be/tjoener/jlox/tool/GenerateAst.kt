@@ -50,7 +50,7 @@ object GenerateAst {
         // Store parameters in fields.
         val fields = fieldList
             .split(", ")
-            .joinToString { it.split(' ')[1] + ": " + it.split(' ')[0] }
+            .joinToString { "val " + it.split(' ')[1] + ": " + it.split(' ')[0] }
 
         writer.println()
         writer.println("class $className($fields) : $baseName() {")
