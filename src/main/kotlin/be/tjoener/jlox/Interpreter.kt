@@ -5,14 +5,15 @@ import be.tjoener.jlox.parser.Token
 import be.tjoener.jlox.parser.TokenType.*
 import java.util.*
 
-class Interpreter : Visitor<LoxValue> {
+class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
-    fun interpret(expression: Expr) {
+    fun interpret(statements: List<Stmt>) {
         try {
-            val value = evaluate(expression)
-            println(stringify(value))
+            for (statement in statements) {
+                execute(statement)
+            }
         } catch (error: RuntimeError) {
-
+            JLox.runtimeError(error)
         }
     }
 
@@ -23,12 +24,33 @@ class Interpreter : Visitor<LoxValue> {
         return value.toString()
     }
 
+
+    private fun execute(stmt: Stmt) {
+        stmt.accept(this)
+    }
+
+    override fun visitExpressionStmt(stmt: Expression) {
+        evaluate(stmt.expression)
+    }
+
+    override fun visitPrintStmt(stmt: Print) {
+        val value = evaluate(stmt.expression)
+        println(stringify(value))
+    }
+
+
     private fun evaluate(expr: Expr): LoxValue {
         return expr.accept(this)
     }
 
     override fun visitLiteralExpr(expr: Literal): LoxValue {
-        return expr.value
+        return when (expr.value) {
+            null -> LoxNil
+            is Boolean -> LoxBool(expr.value)
+            is Double -> LoxDouble(expr.value)
+            is String -> LoxString(expr.value)
+            else -> error("Invalid literal type")
+        }
     }
 
     override fun visitGroupingExpr(expr: Grouping): LoxValue {
@@ -100,7 +122,6 @@ class Interpreter : Visitor<LoxValue> {
             else -> throw NotImplementedError()
         }
     }
-
 
     private fun isTruthy(value: LoxValue): Boolean {
         if (value.isNil()) return false

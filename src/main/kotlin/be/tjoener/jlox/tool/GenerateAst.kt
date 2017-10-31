@@ -18,8 +18,13 @@ object GenerateAst {
         defineAst(outputDir, "Expr", listOf(
             "Unary    : Token operator, Expr right",
             "Binary   : Expr left, Token operator, Expr right",
-            "Literal  : Any value",
+            "Literal  : Any? value",
             "Grouping : Expr expression"
+        ))
+
+        defineAst(outputDir, "Stmt", listOf(
+            "Expression : Expr expression",
+            "Print      : Expr expression"
         ))
     }
 
@@ -32,6 +37,10 @@ object GenerateAst {
             it.println()
             it.println("sealed class $baseName {")
             it.println("    abstract fun <R> accept(visitor: Visitor<R>): R")
+
+            it.println()
+            defineVisitor(it, baseName, types)
+
             it.println("}")
 
             // The AST classes
@@ -40,9 +49,6 @@ object GenerateAst {
                 val fields = type.split(':')[1].trim()
                 defineType(it, baseName, className, fields)
             }
-
-            it.println()
-            defineVisitor(it, baseName, types)
         }
     }
 
@@ -64,14 +70,14 @@ object GenerateAst {
     }
 
     private fun defineVisitor(writer: PrintWriter, baseName: String, types: List<String>) {
-        writer.println("interface Visitor<out R> {")
+        writer.println("    interface Visitor<out R> {")
 
         for (type in types) {
             val typeName = type.split(':')[0].trim()
-            writer.println("    fun visit$typeName$baseName(${baseName.toLowerCase()}: $typeName): R")
+            writer.println("        fun visit$typeName$baseName(${baseName.toLowerCase()}: $typeName): R")
         }
 
-        writer.println("}")
+        writer.println("    }")
     }
 
 }

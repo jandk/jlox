@@ -42,12 +42,12 @@ object JLox {
 
     private fun run(source: String) {
         val tokens = Scanner(source).scanTokens()
-        val expr = Parser(tokens).parse()
+        val statements = Parser(tokens).parse()
 
         // Stop if there was a syntax error
-        if (hadError || expr == null) return
+        if (hadError) return
 
-        interpreter.interpret(expr)
+        interpreter.interpret(statements)
     }
 
     fun error(line: Int, message: String) {

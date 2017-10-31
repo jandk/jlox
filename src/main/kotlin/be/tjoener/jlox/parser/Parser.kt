@@ -10,13 +10,32 @@ class Parser(private val tokens: List<Token>) {
 
     private var current = 0
 
-    fun parse(): Expr? {
-        return try {
-            expression()
-        } catch (e: ParseError) {
-            null
+    fun parse(): List<Stmt> {
+        val statements = mutableListOf<Stmt>()
+        while (!isAtEnd()) {
+            statements.add(statement())
         }
+
+        return statements
     }
+
+    private fun statement(): Stmt {
+        if (match(PRINT)) return printStatement()
+        return expressionStatement()
+    }
+
+    private fun printStatement(): Stmt {
+        val value = expression()
+        consume(SEMICOLON, "Expect ';' after value")
+        return Print(value)
+    }
+
+    private fun expressionStatement(): Stmt {
+        val value = expression()
+        consume(SEMICOLON, "Expect ';' after expression")
+        return Expression(value)
+    }
+
 
     private fun expression(): Expr {
         return equality()
@@ -81,12 +100,12 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun primary(): Expr {
-        if (match(FALSE)) return Literal(LoxBool(false))
-        if (match(TRUE)) return Literal(LoxBool(true))
-        if (match(NIL)) return Literal(LoxNil)
+        if (match(FALSE)) return Literal(false)
+        if (match(TRUE)) return Literal(true)
+        if (match(NIL)) return Literal(null)
 
-        if (match(NUMBER)) return Literal(LoxDouble(previous().literal as Double))
-        if (match(STRING)) return Literal(LoxString(previous().literal as String))
+        if (match(NUMBER)) return Literal(previous().literal)
+        if (match(STRING)) return Literal(previous().literal)
 
         if (match(LEFT_PAREN)) {
             val expr = expression()
