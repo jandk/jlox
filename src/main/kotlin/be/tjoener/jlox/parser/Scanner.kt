@@ -14,7 +14,7 @@ class Scanner(val source: String) {
 
     fun scanTokens(): List<Token> {
         while (!isAtEnd()) {
-            // We are at the beginning of the next lexeme.
+            // We are at the beginning of the next lexeme
             start = current
             scanToken()
         }
@@ -40,14 +40,78 @@ class Scanner(val source: String) {
             '=' -> addToken(if (match('=')) EQUAL_EQUAL else EQUAL)
             '<' -> addToken(if (match('=')) LESS_EQUAL else LESS)
             '>' -> addToken(if (match('=')) GREATER_EQUAL else GREATER)
+            '/' -> {
+                if (match('/')) {
+                    // A comment goes until the end of the line
+                    while (peek() != '\n' && !isAtEnd()) {
+                        advance()
+                    }
+                } else {
+                    addToken(SLASH)
+                }
+            }
+            ' ', '\r', '\t' -> {
+            }
+            '\n' -> line++
+            '"' -> string()
 
-            else -> JLox.error(line, "Unexpected character")
+            else -> {
+                if (isDigit(c)) {
+                    number()
+                } else {
+                    JLox.error(line, "Unexpected character")
+                }
+            }
         }
+    }
+
+    private fun string() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') line++
+            advance()
+        }
+
+        // Unterminated string
+        if (isAtEnd()) {
+            JLox.error(line, "Unterminated string.")
+            return
+        }
+
+        // The closing "
+        advance()
+
+        // Trim the surrounding quotes
+        val value = source.substring(start + 1, current - 1)
+        addToken(STRING, value)
+
+    }
+
+    private fun number() {
+        while (isDigit(peek())) advance()
+
+        // Look for a fractional part
+        if (peek() == '.' && isDigit(peekNext())) {
+            // Consume the "."
+            advance()
+
+            while (isDigit(peek())) advance()
+        }
+
+        addToken(NUMBER, source.substring(start, current).toDouble())
     }
 
     private fun advance(): Char {
         return source[current++]
     }
+
+    private fun peek(): Char {
+        return if (isAtEnd()) '\u0000' else source[current]
+    }
+
+    private fun peekNext(): Char {
+        return if (current + 1 >= source.length) '\u0000' else source[current + 1]
+    }
+
 
     private fun match(expected: Char): Boolean {
         if (isAtEnd() || source[current] != expected) {
@@ -69,6 +133,10 @@ class Scanner(val source: String) {
 
     private fun isAtEnd(): Boolean {
         return current >= source.length
+    }
+
+    private fun isDigit(c: Char): Boolean {
+        return c in '0'..'9'
     }
 
 }
