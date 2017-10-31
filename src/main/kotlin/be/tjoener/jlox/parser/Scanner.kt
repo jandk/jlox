@@ -58,6 +58,8 @@ class Scanner(val source: String) {
             else -> {
                 if (isDigit(c)) {
                     number()
+                } else if (isAlpha(c)) {
+                    identifier()
                 } else {
                     JLox.error(line, "Unexpected character")
                 }
@@ -100,6 +102,16 @@ class Scanner(val source: String) {
         addToken(NUMBER, source.substring(start, current).toDouble())
     }
 
+    private fun identifier() {
+        while (isAlphaNumeric(peek())) advance()
+
+        // See if the identifier is a reserved word
+        val text = source.substring(start, current)
+
+        val type = keywords.getOrDefault(text, IDENTIFIER)
+        addToken(type)
+    }
+
     private fun advance(): Char {
         return source[current++]
     }
@@ -137,6 +149,35 @@ class Scanner(val source: String) {
 
     private fun isDigit(c: Char): Boolean {
         return c in '0'..'9'
+    }
+
+    private fun isAlpha(c: Char): Boolean {
+        return c in 'a'..'z' || c in 'A'..'Z' || c == '_'
+    }
+
+    private fun isAlphaNumeric(c: Char): Boolean {
+        return isAlpha(c) || isDigit(c)
+    }
+
+    companion object {
+        val keywords = mapOf(
+            "and" to AND,
+            "class" to CLASS,
+            "else" to ELSE,
+            "false" to FALSE,
+            "for" to FOR,
+            "fun" to FUN,
+            "if" to IF,
+            "nil" to NIL,
+            "or" to OR,
+            "print" to PRINT,
+            "return" to RETURN,
+            "super" to SUPER,
+            "this" to THIS,
+            "true" to TRUE,
+            "var" to VAR,
+            "while" to WHILE
+        )
     }
 
 }
