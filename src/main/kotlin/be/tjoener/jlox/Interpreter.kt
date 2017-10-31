@@ -67,7 +67,6 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         environment.define(stmt.name.lexeme, value)
     }
 
-
     override fun visitAssignExpr(expr: Assign): LoxValue {
         val value = evaluate(expr.value)
 
@@ -78,6 +77,15 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     override fun visitBlockStmt(stmt: Block) {
         executeBlock(stmt.statements, Environment(environment))
     }
+
+    override fun visitIfStmt(stmt: If) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch)
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch)
+        }
+    }
+
 
     override fun visitVariableExpr(expr: Variable): LoxValue {
         return environment.get(expr.name)

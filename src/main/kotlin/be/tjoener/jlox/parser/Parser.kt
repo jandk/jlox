@@ -45,9 +45,33 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun statement(): Stmt {
+        if (match(IF)) return ifStatement()
         if (match(PRINT)) return printStatement()
         if (match(LEFT_BRACE)) return Block(block())
         return expressionStatement()
+    }
+
+    private fun ifStatement(): Stmt {
+        consume(LEFT_PAREN, "Expect '(' after 'if'")
+        val condition = expression()
+        consume(RIGHT_PAREN, "Expect ')' after if condition")
+
+        val thenBranch = statement()
+        val elseBranch = if (match(ELSE)) statement() else null
+
+        return If(condition, thenBranch, elseBranch)
+    }
+
+    private fun printStatement(): Stmt {
+        val value = expression()
+        consume(SEMICOLON, "Expect ';' after value")
+        return Print(value)
+    }
+
+    private fun expressionStatement(): Stmt {
+        val value = expression()
+        consume(SEMICOLON, "Expect ';' after expression")
+        return Expression(value)
     }
 
     private fun block(): List<Stmt> {
@@ -62,18 +86,6 @@ class Parser(private val tokens: List<Token>) {
 
         consume(RIGHT_BRACE, "Expect '}' after block.")
         return statements
-    }
-
-    private fun printStatement(): Stmt {
-        val value = expression()
-        consume(SEMICOLON, "Expect ';' after value")
-        return Print(value)
-    }
-
-    private fun expressionStatement(): Stmt {
-        val value = expression()
-        consume(SEMICOLON, "Expect ';' after expression")
-        return Expression(value)
     }
 
 
