@@ -81,13 +81,12 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun primary(): Expr {
-        if (match(FALSE)) return Literal(false)
-        if (match(TRUE)) return Literal(true)
-        if (match(NIL)) return Literal(null)
+        if (match(FALSE)) return Literal(LoxBool(false))
+        if (match(TRUE)) return Literal(LoxBool(true))
+        if (match(NIL)) return Literal(LoxNil)
 
-        if (match(NUMBER, STRING)) {
-            return Literal(previous().literal)
-        }
+        if (match(NUMBER)) return Literal(LoxDouble(previous().literal as Double))
+        if (match(STRING)) return Literal(LoxString(previous().literal as String))
 
         if (match(LEFT_PAREN)) {
             val expr = expression()
