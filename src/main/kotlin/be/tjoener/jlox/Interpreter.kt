@@ -18,7 +18,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     private fun stringify(value: LoxValue): String {
-        if (value.isDouble()) {
+        if (value is LoxDouble) {
             return value.toString().removeSuffix(".0")
         }
         return value.toString()
@@ -74,11 +74,11 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         val left = evaluate(expr.left)
         val right = evaluate(expr.right)
 
-        return when (expr.operator.type) {
+        when (expr.operator.type) {
             PLUS -> {
-                when {
-                    left.isDouble() && right.isDouble() -> LoxDouble(left.asDouble() + right.asDouble())
-                    left.isString() && right.isString() -> LoxString(left.asString() + right.asString())
+                return when {
+                    left is LoxDouble && right is LoxDouble -> LoxDouble(left.value + right.value)
+                    left is LoxString && right is LoxString -> LoxString(left.value + right.value)
                     else -> throw RuntimeError(expr.operator, "Operands must be two numbers or two strings")
                 }
             }
@@ -86,15 +86,15 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
             MINUS -> {
                 checkNumberOperands(expr.operator, left, right)
-                LoxDouble(left.asDouble() - right.asDouble())
+                return LoxDouble(left.asDouble() - right.asDouble())
             }
             STAR -> {
                 checkNumberOperands(expr.operator, left, right)
-                LoxDouble(left.asDouble() * right.asDouble())
+                return LoxDouble(left.asDouble() * right.asDouble())
             }
             SLASH -> {
                 checkNumberOperands(expr.operator, left, right)
-                LoxDouble(left.asDouble() / right.asDouble())
+                return LoxDouble(left.asDouble() / right.asDouble())
             }
 
 
@@ -124,8 +124,8 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     private fun isTruthy(value: LoxValue): Boolean {
-        if (value.isNil()) return false
-        if (value.isBool()) return value.asBool()
+        if (value is LoxNil) return false
+        if (value is LoxBool) return value.value
         return true
     }
 
@@ -134,12 +134,12 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     private fun checkNumberOperand(operator: Token, operand: LoxValue) {
-        if (operand.isDouble()) return
+        if (operand is LoxDouble) return
         throw RuntimeError(operator, "Operand must be a number")
     }
 
     private fun checkNumberOperands(operator: Token, left: LoxValue, right: LoxValue) {
-        if (left.isDouble() && right.isDouble()) return
+        if (left is LoxDouble && right is LoxDouble) return
         throw RuntimeError(operator, "Operands must be numbers")
     }
 
