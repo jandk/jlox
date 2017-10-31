@@ -1,5 +1,7 @@
 package be.tjoener.jlox.ast
 
+import be.tjoener.jlox.Interpreter
+
 sealed class LoxValue {
 
     open fun asDouble(): Double = throw ex("Double")
@@ -24,4 +26,9 @@ data class LoxDouble(val value: Double) : LoxValue() {
 
 data class LoxString(val value: String) : LoxValue() {
     override fun toString() = value
+}
+
+interface LoxCallable {
+    val arity: Int
+    fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue
 }

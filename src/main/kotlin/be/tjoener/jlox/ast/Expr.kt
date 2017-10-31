@@ -10,6 +10,7 @@ sealed class Expr {
         fun visitUnaryExpr(expr: Unary): R
         fun visitBinaryExpr(expr: Binary): R
         fun visitLogicalExpr(expr: Logical): R
+        fun visitCallExpr(expr: Call): R
         fun visitLiteralExpr(expr: Literal): R
         fun visitGroupingExpr(expr: Grouping): R
         fun visitVariableExpr(expr: Variable): R
@@ -37,6 +38,12 @@ class Binary(val left: Expr, val operator: Token, val right: Expr) : Expr() {
 class Logical(val left: Expr, val operator: Token, val right: Expr) : Expr() {
     override fun <R> accept(visitor: Visitor<R>): R {
         return visitor.visitLogicalExpr(this)
+    }
+}
+
+class Call(val callee: Expr, val paren: Token, val arguments: List<Expr>) : Expr() {
+    override fun <R> accept(visitor: Visitor<R>): R {
+        return visitor.visitCallExpr(this)
     }
 }
 
