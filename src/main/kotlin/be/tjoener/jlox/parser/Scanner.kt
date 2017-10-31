@@ -75,7 +75,7 @@ class Scanner(private val source: String) {
 
         // Unterminated string
         if (isAtEnd()) {
-            JLox.error(line, "Unterminated string.")
+            JLox.error(line, "Unterminated string")
             return
         }
 
