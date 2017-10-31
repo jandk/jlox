@@ -10,7 +10,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <kotlin.version>1.1.51</kotlin.version>
     </properties>
 
@@ -41,14 +40,12 @@
                 <executions>
                     <execution>
                         <id>compile</id>
-                        <phase>compile</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>test-compile</id>
-                        <phase>test-compile</phase>
                         <goals>
                             <goal>test-compile</goal>
                         </goals>
