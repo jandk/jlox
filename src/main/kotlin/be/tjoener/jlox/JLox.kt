@@ -9,6 +9,8 @@ import kotlin.system.exitProcess
 
 object JLox {
 
+    private val interpreter: Interpreter = Interpreter()
+
     @JvmStatic
     fun main(args: Array<String>) {
         if (args.size > 1) {
@@ -25,9 +27,8 @@ object JLox {
         run(source)
 
         // Indicate an error in the exit code
-        if (hadError) {
-            exitProcess(65)
-        }
+        if (hadError) exitProcess(65)
+        if (hadRuntimeError) exitProcess(70)
     }
 
     private fun runPrompt() {
@@ -44,11 +45,9 @@ object JLox {
         val expr = Parser(tokens).parse()
 
         // Stop if there was a syntax error
-        if (hadError) return
+        if (hadError || expr == null) return
 
-        if (expr != null) {
-            println(AstPrinter().print(expr))
-        }
+        interpreter.interpret(expr)
     }
 
     fun error(line: Int, message: String) {
@@ -62,6 +61,13 @@ object JLox {
             report(token.line, " at '${token.lexeme}'", message)
         }
     }
+
+    var hadRuntimeError = false
+    internal fun runtimeError(error: RuntimeError) {
+        System.err.println("${error.message}\n[line ${error.token.line}]")
+        hadRuntimeError = true
+    }
+
 
     var hadError = false
     fun report(line: Int, where: String, message: String) {

@@ -7,7 +7,23 @@ import java.util.*
 
 class Interpreter : Visitor<LoxValue> {
 
-    fun evaluate(expr: Expr): LoxValue {
+    fun interpret(expression: Expr) {
+        try {
+            val value = evaluate(expression)
+            println(stringify(value))
+        } catch (error: RuntimeError) {
+
+        }
+    }
+
+    private fun stringify(value: LoxValue): String {
+        if (value.isDouble()) {
+            return value.toString().removeSuffix(".0")
+        }
+        return value.toString()
+    }
+
+    private fun evaluate(expr: Expr): LoxValue {
         return expr.accept(this)
     }
 
