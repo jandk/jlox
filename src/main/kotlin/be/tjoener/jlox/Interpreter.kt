@@ -98,6 +98,12 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         return evaluate(expr.right)
     }
 
+    override fun visitWhileStmt(stmt: While) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body)
+        }
+    }
+
 
     override fun visitVariableExpr(expr: Variable): LoxValue {
         return environment.get(expr.name)
