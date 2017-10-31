@@ -1,5 +1,6 @@
 package be.tjoener.jlox
 
+import be.tjoener.jlox.parser.Parser
 import be.tjoener.jlox.parser.Scanner
 import be.tjoener.jlox.parser.Token
 import be.tjoener.jlox.parser.TokenType
@@ -39,12 +40,14 @@ object JLox {
     }
 
     private fun run(source: String) {
-        val scanner = Scanner(source)
-        val tokens = scanner.scanTokens()
+        val tokens = Scanner(source).scanTokens()
+        val expr = Parser(tokens).parse()
 
-        // For now, just print the tokens
-        for (token in tokens) {
-            println(token)
+        // Stop if there was a syntax error
+        if (hadError) return
+
+        if (expr != null) {
+            println(AstPrinter().print(expr))
         }
     }
 

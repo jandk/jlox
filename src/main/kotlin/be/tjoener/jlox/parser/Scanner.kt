@@ -4,7 +4,7 @@ import be.tjoener.jlox.JLox
 import be.tjoener.jlox.parser.TokenType.*
 
 
-class Scanner(val source: String) {
+class Scanner(private val source: String) {
 
     private val tokens = mutableListOf<Token>()
 

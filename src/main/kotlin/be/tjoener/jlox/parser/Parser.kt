@@ -4,11 +4,19 @@ import be.tjoener.jlox.JLox
 import be.tjoener.jlox.ast.*
 import be.tjoener.jlox.parser.TokenType.*
 
-class Parser(val tokens: List<Token>) {
+class Parser(private val tokens: List<Token>) {
 
     class ParseError : RuntimeException()
 
     private var current = 0
+
+    fun parse(): Expr? {
+        return try {
+            expression()
+        } catch (e: ParseError) {
+            null
+        }
+    }
 
     private fun expression(): Expr {
         return equality()
@@ -87,7 +95,7 @@ class Parser(val tokens: List<Token>) {
             return Grouping(expr)
         }
 
-        TODO()
+        throw error(peek(), "Expect expression")
     }
 
     private fun match(vararg types: TokenType): Boolean {
