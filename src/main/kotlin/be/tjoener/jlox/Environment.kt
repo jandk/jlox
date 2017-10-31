@@ -3,7 +3,7 @@ package be.tjoener.jlox
 import be.tjoener.jlox.ast.LoxValue
 import be.tjoener.jlox.parser.Token
 
-class Environment {
+class Environment(val enclosing: Environment? = null) {
 
     private val values: MutableMap<String, LoxValue> = hashMapOf()
 
@@ -12,16 +12,30 @@ class Environment {
     }
 
     fun get(name: Token): LoxValue {
-        return values[name.lexeme]
-            ?: throw RuntimeError(name, "Undefined variable '${name.lexeme}'")
+        val value = values[name.lexeme]
+        if (value != null) {
+            return value
+        }
+
+        if (enclosing != null) {
+            return enclosing.get(name)
+        }
+
+        throw RuntimeError(name, "Undefined variable '${name.lexeme}'")
     }
 
     fun assign(name: Token, value: LoxValue) {
-        if (!values.containsKey(name.lexeme)) {
-            throw RuntimeError(name, "Undefined variable '${name.lexeme}'")
+        if (values.containsKey(name.lexeme)) {
+            values.put(name.lexeme, value)
+            return
         }
 
-        values.put(name.lexeme, value)
+        if (enclosing != null) {
+            enclosing.assign(name, value)
+            return
+        }
+
+        throw RuntimeError(name, "Undefined variable '${name.lexeme}'")
     }
 
 }
