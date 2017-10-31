@@ -1,6 +1,8 @@
 package be.tjoener.jlox.parser
 
-import be.tjoener.jlox.parser.TokenType.EOF
+import be.tjoener.jlox.JLox
+import be.tjoener.jlox.parser.TokenType.*
+
 
 class Scanner(val source: String) {
 
@@ -22,7 +24,47 @@ class Scanner(val source: String) {
     }
 
     private fun scanToken() {
-        TODO()
+        val c = advance()
+        when (c) {
+            '(' -> addToken(LEFT_PAREN)
+            ')' -> addToken(RIGHT_PAREN)
+            '{' -> addToken(LEFT_BRACE)
+            '}' -> addToken(RIGHT_BRACE)
+            ',' -> addToken(COMMA)
+            '.' -> addToken(DOT)
+            '-' -> addToken(MINUS)
+            '+' -> addToken(PLUS)
+            ';' -> addToken(SEMICOLON)
+            '*' -> addToken(STAR)
+            '!' -> addToken(if (match('=')) BANG_EQUAL else BANG)
+            '=' -> addToken(if (match('=')) EQUAL_EQUAL else EQUAL)
+            '<' -> addToken(if (match('=')) LESS_EQUAL else LESS)
+            '>' -> addToken(if (match('=')) GREATER_EQUAL else GREATER)
+
+            else -> JLox.error(line, "Unexpected character")
+        }
+    }
+
+    private fun advance(): Char {
+        return source[current++]
+    }
+
+    private fun match(expected: Char): Boolean {
+        if (isAtEnd() || source[current] != expected) {
+            return false
+        }
+
+        current++
+        return true
+    }
+
+    private fun addToken(type: TokenType) {
+        addToken(type, null)
+    }
+
+    private fun addToken(type: TokenType, literal: Any?) {
+        val text = source.substring(start, current)
+        tokens.add(Token(type, text, literal, line))
     }
 
     private fun isAtEnd(): Boolean {
