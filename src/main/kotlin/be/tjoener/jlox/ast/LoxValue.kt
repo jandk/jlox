@@ -28,7 +28,7 @@ data class LoxString(val value: String) : LoxValue() {
     override fun toString() = value
 }
 
-interface LoxCallable {
-    val arity: Int
-    fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue
+abstract class LoxCallable : LoxValue() {
+    abstract val arity: Int
+    abstract fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue
 }

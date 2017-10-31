@@ -7,7 +7,19 @@ import java.util.*
 
 class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
-    private var environment = Environment()
+    private val globals = Environment()
+    private var environment = globals
+
+    init {
+        globals.define("clock", object : LoxCallable() {
+            override val arity: Int
+                get() = 0
+
+            override fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue {
+                return LoxDouble(System.currentTimeMillis() / 1000.0)
+            }
+        })
+    }
 
     fun interpret(statements: List<Stmt>) {
         try {
