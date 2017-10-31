@@ -3,6 +3,7 @@ package be.tjoener.jlox
 import be.tjoener.jlox.ast.*
 
 class AstPrinter : Expr.Visitor<String> {
+
     fun print(expr: Expr): String {
         return expr.accept(this)
     }
@@ -28,6 +29,10 @@ class AstPrinter : Expr.Visitor<String> {
     }
 
     override fun visitAssignExpr(expr: Assign): String {
+        TODO()
+    }
+
+    override fun visitLogicalExpr(expr: Logical): String {
         TODO()
     }
 

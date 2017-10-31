@@ -86,6 +86,18 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         }
     }
 
+    override fun visitLogicalExpr(expr: Logical): LoxValue {
+        val left = evaluate(expr.left)
+
+        if (expr.operator.type == OR) {
+            if (isTruthy(left)) return left
+        } else {
+            if (!isTruthy(left)) return left
+        }
+
+        return evaluate(expr.right)
+    }
+
 
     override fun visitVariableExpr(expr: Variable): LoxValue {
         return environment.get(expr.name)

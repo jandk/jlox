@@ -19,6 +19,7 @@ object GenerateAst {
             "Assign   : Token name, Expr value",
             "Unary    : Token operator, Expr right",
             "Binary   : Expr left, Token operator, Expr right",
+            "Logical  : Expr left, Token operator, Expr right",
             "Literal  : Any? value",
             "Grouping : Expr expression",
             "Variable : Token name"
