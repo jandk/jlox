@@ -6,6 +6,9 @@ import be.tjoener.jlox.parser.TokenType.*
 import java.util.*
 
 class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
+
+    private val environment = Environment()
+
     fun interpret(statements: List<Stmt>) {
         try {
             for (statement in statements) {
@@ -38,7 +41,12 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     override fun visitVarStmt(stmt: Var) {
-        TODO()
+        var value: LoxValue = LoxNil
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer)
+        }
+
+        environment.define(stmt.name.lexeme, value)
     }
 
 
@@ -127,7 +135,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     override fun visitVariableExpr(expr: Variable): LoxValue {
-        TODO()
+        return environment.get(expr.name)
     }
 
 
