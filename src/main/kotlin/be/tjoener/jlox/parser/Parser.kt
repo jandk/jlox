@@ -2,6 +2,7 @@ package be.tjoener.jlox.parser
 
 import be.tjoener.jlox.JLox
 import be.tjoener.jlox.ast.*
+import be.tjoener.jlox.ast.Function
 import be.tjoener.jlox.parser.TokenType.*
 
 class Parser(private val tokens: List<Token>) {
@@ -25,6 +26,7 @@ class Parser(private val tokens: List<Token>) {
     private fun declaration(): Stmt? {
         try {
             if (match(VAR)) return varDeclaration()
+            if (match(FUN)) return function("function")
             return statement()
         } catch (error: ParseError) {
             synchronize()
@@ -42,6 +44,27 @@ class Parser(private val tokens: List<Token>) {
 
         consume(SEMICOLON, "Expect ';' after variable declaration")
         return Var(name, initializer)
+    }
+
+    private fun function(kind: String): Stmt? {
+        val name = consume(IDENTIFIER, "Expect $kind name")
+        consume(LEFT_PAREN, "Expect '(' after $kind name")
+
+        val parameters = mutableListOf<Token>()
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (parameters.size >= 8) {
+                    error(peek(), "Cannot have more than 8 parameters")
+                }
+                parameters.add(consume(IDENTIFIER, "Expect parameter name"))
+            } while (match(COMMA))
+        }
+        consume(RIGHT_PAREN, "Expect ')' after parameters")
+
+        consume(LEFT_BRACE, "Expect '{' before $kind body")
+        val body = block()
+
+        return Function(name, parameters, body)
     }
 
     private fun statement(): Stmt {
