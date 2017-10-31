@@ -1,10 +1,12 @@
 package be.tjoener.jlox.parser
 
+import be.tjoener.jlox.JLox
 import be.tjoener.jlox.ast.*
 import be.tjoener.jlox.parser.TokenType.*
 
-
 class Parser(val tokens: List<Token>) {
+
+    class ParseError : RuntimeException()
 
     private var current = 0
 
@@ -88,10 +90,6 @@ class Parser(val tokens: List<Token>) {
         TODO()
     }
 
-    private fun consume(type: TokenType, message: String) {
-        TODO()
-    }
-
     private fun match(vararg types: TokenType): Boolean {
         val matches = types.any { check(it) }
         if (matches) advance()
@@ -99,7 +97,7 @@ class Parser(val tokens: List<Token>) {
     }
 
     private fun check(tokenType: TokenType): Boolean {
-        return if (isAtEnd()) false else peek().type === tokenType
+        return if (isAtEnd()) false else peek().type == tokenType
     }
 
     private fun advance(): Token {
@@ -108,7 +106,7 @@ class Parser(val tokens: List<Token>) {
     }
 
     private fun isAtEnd(): Boolean {
-        return peek().type === EOF
+        return peek().type == EOF
     }
 
     private fun peek(): Token {
@@ -117,6 +115,28 @@ class Parser(val tokens: List<Token>) {
 
     private fun previous(): Token {
         return tokens[current - 1]
+    }
+
+    private fun consume(type: TokenType, message: String): Token {
+        if (check(type)) return advance()
+
+        throw error(peek(), message)
+    }
+
+    private fun error(token: Token, message: String): ParseError {
+        JLox.error(token, message)
+        throw ParseError()
+    }
+
+    private fun synchronize() {
+        val boundaries = listOf(CLASS, FUN, VAR, FOR, IF, WHILE, PRINT, RETURN)
+
+        advance()
+        while (!isAtEnd()) {
+            if (previous().type == SEMICOLON) return
+            if (peek().type in boundaries) return
+            advance()
+        }
     }
 
 }

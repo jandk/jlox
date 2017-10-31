@@ -1,6 +1,8 @@
 package be.tjoener.jlox
 
 import be.tjoener.jlox.parser.Scanner
+import be.tjoener.jlox.parser.Token
+import be.tjoener.jlox.parser.TokenType
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -48,6 +50,14 @@ object JLox {
 
     fun error(line: Int, message: String) {
         report(line, "", message)
+    }
+
+    fun error(token: Token, message: String) {
+        if (token.type == TokenType.EOF) {
+            report(token.line, " at end", message)
+        } else {
+            report(token.line, " at '${token.lexeme}'", message)
+        }
     }
 
     var hadError = false
