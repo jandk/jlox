@@ -19,18 +19,19 @@ object GenerateAst {
             "Unary    : Token operator, Expr right",
             "Binary   : Expr left, Token operator, Expr right",
             "Literal  : Any? value",
-            "Grouping : Expr expression"
+            "Grouping : Expr expression",
+            "Variable : Token name"
         ))
 
         defineAst(outputDir, "Stmt", listOf(
             "Expression : Expr expression",
-            "Print      : Expr expression"
+            "Print      : Expr expression",
+            "Var        : Token name, Expr? initializer"
         ))
     }
 
     private fun defineAst(outputDir: String, baseName: String, types: List<String>) {
-        val writer = File("$outputDir/$baseName.kt").printWriter().use {
-
+        File("$outputDir/$baseName.kt").printWriter().use {
             it.println("package be.tjoener.jlox.ast")
             it.println()
             it.println("import be.tjoener.jlox.parser.Token")

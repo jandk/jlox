@@ -6,7 +6,6 @@ import be.tjoener.jlox.parser.TokenType.*
 import java.util.*
 
 class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
-
     fun interpret(statements: List<Stmt>) {
         try {
             for (statement in statements) {
@@ -24,10 +23,10 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         return value.toString()
     }
 
-
     private fun execute(stmt: Stmt) {
         stmt.accept(this)
     }
+
 
     override fun visitExpressionStmt(stmt: Expression) {
         evaluate(stmt.expression)
@@ -36,6 +35,10 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     override fun visitPrintStmt(stmt: Print) {
         val value = evaluate(stmt.expression)
         println(stringify(value))
+    }
+
+    override fun visitVarStmt(stmt: Var) {
+        TODO()
     }
 
 
@@ -122,6 +125,11 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
             else -> throw NotImplementedError()
         }
     }
+
+    override fun visitVariableExpr(expr: Variable): LoxValue {
+        TODO()
+    }
+
 
     private fun isTruthy(value: LoxValue): Boolean {
         if (value is LoxNil) return false

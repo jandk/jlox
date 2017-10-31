@@ -13,10 +13,32 @@ class Parser(private val tokens: List<Token>) {
     fun parse(): List<Stmt> {
         val statements = mutableListOf<Stmt>()
         while (!isAtEnd()) {
-            statements.add(statement())
+//            statements.add(declaration())
         }
 
         return statements
+    }
+
+    private fun declaration(): Stmt? {
+        try {
+            if (match(VAR)) return varDeclaration()
+            return statement()
+        } catch (error: ParseError) {
+            synchronize()
+            return null
+        }
+    }
+
+    private fun varDeclaration(): Stmt {
+        val name = consume(IDENTIFIER, "Expect variable name")
+
+        var initializer: Expr? = null
+        if (match(EQUAL)) {
+            initializer = expression()
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration")
+        return Var(name, initializer)
     }
 
     private fun statement(): Stmt {
@@ -106,6 +128,8 @@ class Parser(private val tokens: List<Token>) {
 
         if (match(NUMBER)) return Literal(previous().literal)
         if (match(STRING)) return Literal(previous().literal)
+
+        if (match(IDENTIFIER)) return Variable(previous())
 
         if (match(LEFT_PAREN)) {
             val expr = expression()

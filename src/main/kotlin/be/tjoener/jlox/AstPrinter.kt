@@ -23,6 +23,10 @@ class AstPrinter : Expr.Visitor<String> {
         return parenthesize("group", expr.expression)
     }
 
+    override fun visitVariableExpr(expr: Variable): String {
+        TODO()
+    }
+
     private fun parenthesize(name: String, vararg exprs: Expr): String {
         val builder = StringBuilder().append('(').append(name)
         for (expr in exprs) {
