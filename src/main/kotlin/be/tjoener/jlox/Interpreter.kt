@@ -54,6 +54,17 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         return expr.accept(this)
     }
 
+    override fun visitAssignExpr(expr: Assign): LoxValue {
+        val value = evaluate(expr.value)
+
+        environment.assign(expr.name, value)
+        return value
+    }
+
+    override fun visitVariableExpr(expr: Variable): LoxValue {
+        return environment.get(expr.name)
+    }
+
     override fun visitLiteralExpr(expr: Literal): LoxValue {
         return when (expr.value) {
             null -> LoxNil
@@ -132,10 +143,6 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
             else -> throw NotImplementedError()
         }
-    }
-
-    override fun visitVariableExpr(expr: Variable): LoxValue {
-        return environment.get(expr.name)
     }
 
 

@@ -6,11 +6,18 @@ sealed class Expr {
     abstract fun <R> accept(visitor: Visitor<R>): R
 
     interface Visitor<out R> {
+        fun visitAssignExpr(expr: Assign): R
         fun visitUnaryExpr(expr: Unary): R
         fun visitBinaryExpr(expr: Binary): R
         fun visitLiteralExpr(expr: Literal): R
         fun visitGroupingExpr(expr: Grouping): R
         fun visitVariableExpr(expr: Variable): R
+    }
+}
+
+class Assign(val name: Token, val value: Expr) : Expr() {
+    override fun <R> accept(visitor: Visitor<R>): R {
+        return visitor.visitAssignExpr(this)
     }
 }
 

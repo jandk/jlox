@@ -16,6 +16,7 @@ object GenerateAst {
         val outputDir = args[0]
 
         defineAst(outputDir, "Expr", listOf(
+            "Assign   : Token name, Expr value",
             "Unary    : Token operator, Expr right",
             "Binary   : Expr left, Token operator, Expr right",
             "Literal  : Any? value",

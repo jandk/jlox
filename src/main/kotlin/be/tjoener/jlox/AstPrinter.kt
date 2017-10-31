@@ -27,6 +27,10 @@ class AstPrinter : Expr.Visitor<String> {
         TODO()
     }
 
+    override fun visitAssignExpr(expr: Assign): String {
+        TODO()
+    }
+
     private fun parenthesize(name: String, vararg exprs: Expr): String {
         val builder = StringBuilder().append('(').append(name)
         for (expr in exprs) {
