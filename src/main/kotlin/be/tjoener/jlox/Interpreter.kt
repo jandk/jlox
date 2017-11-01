@@ -10,7 +10,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
     class ReturnValue(val value: LoxValue) : RuntimeException(null, null, false, false)
 
-    internal val globals = Environment()
+    private val globals = Environment()
     private var environment = globals
 
     init {
@@ -61,6 +61,10 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         } finally {
             this.environment = previous
         }
+    }
+
+    internal fun resolve(expr: Expr, depth: Int) {
+        TODO()
     }
 
 
