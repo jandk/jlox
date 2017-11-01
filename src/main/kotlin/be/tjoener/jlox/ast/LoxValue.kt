@@ -57,3 +57,7 @@ class LoxFunction(private val declaration: Function, private val closure: Enviro
         return "<fn ${declaration.name.lexeme}>"
     }
 }
+
+class LoxClass(val name: String) : LoxValue() {
+    override fun toString() = name
+}

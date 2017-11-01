@@ -28,6 +28,7 @@ object GenerateAst {
 
         defineAst(outputDir, "Stmt", listOf(
             "Block      : List<Stmt> statements",
+            "Class      : Token name, List<Function> methods",
             "Expression : Expr expression",
             "Function   : Token name, List<Token> parameters, List<Stmt> body",
             "If         : Expr condition, Stmt thenBranch, Stmt? elseBranch",
