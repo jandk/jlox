@@ -326,6 +326,8 @@ class Parser(private val tokens: List<Token>) {
         if (match(NUMBER)) return Literal(previous().literal)
         if (match(STRING)) return Literal(previous().literal)
 
+        if (match(THIS)) return This(previous())
+
         if (match(IDENTIFIER)) return Variable(previous())
 
         if (match(LEFT_PAREN)) {

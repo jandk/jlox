@@ -12,8 +12,13 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         NONE, FUNCTION, METHOD
     }
 
-    private val scopes: Stack<MutableMap<String, Boolean>> = Stack()
-    private var currentFunction: FunctionType = FunctionType.NONE
+    private enum class ClassType {
+        NONE, CLASS
+    }
+
+    private val scopes = Stack<MutableMap<String, Boolean>>()
+    private var currentFunction = FunctionType.NONE
+    private var currentClass = ClassType.NONE
 
     fun resolve(statements: List<Stmt>) {
         for (statement in statements) {
@@ -32,9 +37,16 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         declare(stmt.name)
         define(stmt.name)
 
+        val enclosingClass = currentClass
+        beginScope()
+
+        scopes.peek().put("this", true)
         for (method in stmt.methods) {
             resolveFunction(method, FunctionType.METHOD)
         }
+
+        endScope()
+        currentClass = enclosingClass
     }
 
     override fun visitExpressionStmt(stmt: Expression) {
@@ -120,6 +132,13 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
     override fun visitSetExpr(expr: Set) {
         resolve(expr.value)
         resolve(expr.obj)
+    }
+
+    override fun visitThisExpr(expr: This) {
+        if (currentClass == ClassType.NONE) {
+            JLox.error(expr.keyword, "Cannot use 'this' outside of a class")
+        }
+        resolveLocal(expr, expr.keyword)
     }
 
     override fun visitUnaryExpr(expr: Unary) {

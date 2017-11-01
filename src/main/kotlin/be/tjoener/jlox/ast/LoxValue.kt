@@ -55,6 +55,12 @@ class LoxFunction(private val declaration: Function, private val closure: Enviro
         return LoxNil
     }
 
+    fun bind(instance: LoxInstance): LoxFunction {
+        val environment = Environment(closure)
+        environment.define("this", instance)
+        return LoxFunction(declaration, environment)
+    }
+
     override fun toString(): String {
         return "<fn ${declaration.name.lexeme}>"
     }
@@ -70,7 +76,7 @@ class LoxClass(val name: String, val methods: Map<String, LoxFunction>) : LoxCal
     }
 
     fun findMethod(instance: LoxInstance, name: String): LoxFunction? {
-        return methods[name]
+        return methods[name]?.bind(instance)
     }
 
     override fun toString() = name

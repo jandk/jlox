@@ -164,6 +164,10 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         return value
     }
 
+    override fun visitThisExpr(expr: This): LoxValue {
+        return lookupVariable(expr.keyword, expr)
+    }
+
     override fun visitUnaryExpr(expr: Unary): LoxValue {
         val right = evaluate(expr.right)
 
