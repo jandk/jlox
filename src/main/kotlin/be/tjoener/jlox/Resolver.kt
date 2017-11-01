@@ -9,7 +9,7 @@ import java.util.*
 class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<Unit> {
 
     private enum class FunctionType {
-        NONE, FUNCTION
+        NONE, FUNCTION, METHOD
     }
 
     private val scopes: Stack<MutableMap<String, Boolean>> = Stack()
@@ -31,6 +31,10 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
     override fun visitClassStmt(stmt: Class) {
         declare(stmt.name)
         define(stmt.name)
+
+        for (method in stmt.methods) {
+            resolveFunction(method, FunctionType.METHOD)
+        }
     }
 
     override fun visitExpressionStmt(stmt: Expression) {

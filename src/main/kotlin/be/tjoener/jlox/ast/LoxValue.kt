@@ -60,13 +60,17 @@ class LoxFunction(private val declaration: Function, private val closure: Enviro
     }
 }
 
-class LoxClass(val name: String) : LoxCallable() {
+class LoxClass(val name: String, val methods: Map<String, LoxFunction>) : LoxCallable() {
     override val arity: Int
         get() = 0
 
     override fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue {
         val instance = LoxInstance(this)
         return instance
+    }
+
+    fun findMethod(instance: LoxInstance, name: String): LoxFunction? {
+        return methods[name]
     }
 
     override fun toString() = name
@@ -76,8 +80,17 @@ class LoxInstance(val klass: LoxClass) : LoxValue() {
     private val fields = mutableMapOf<String, LoxValue>()
 
     fun get(name: Token): LoxValue {
-        return fields[name.lexeme]
-            ?: throw RuntimeError(name, "Undefined property '${name.lexeme}'")
+        val value = fields[name.lexeme]
+        if (value != null) {
+            return value
+        }
+
+        val method = klass.findMethod(this, name.lexeme)
+        if (method != null) {
+            return method
+        }
+
+        throw RuntimeError(name, "Undefined property '${name.lexeme}'")
     }
 
     fun set(name: Token, value: LoxValue) {
