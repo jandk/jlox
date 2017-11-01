@@ -2,6 +2,7 @@ package be.tjoener.jlox
 
 import be.tjoener.jlox.ast.*
 import be.tjoener.jlox.ast.Function
+import be.tjoener.jlox.ast.Set
 import be.tjoener.jlox.parser.Token
 import be.tjoener.jlox.parser.TokenType.*
 import java.util.*
@@ -119,6 +120,15 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         return function.call(this, arguments)
     }
 
+    override fun visitGetExpr(expr: Get): LoxValue {
+        val obj = evaluate(expr.obj)
+        if (obj is LoxInstance) {
+            return obj.get(expr.name)
+        }
+
+        throw RuntimeError(expr.name, "Only instances have properties")
+    }
+
     override fun visitGroupingExpr(expr: Grouping): LoxValue {
         return evaluate(expr.expression)
     }
@@ -143,6 +153,15 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         }
 
         return evaluate(expr.right)
+    }
+
+    override fun visitSetExpr(expr: Set): LoxValue {
+        val obj = evaluate(expr.obj) as? LoxInstance
+            ?: throw RuntimeError(expr.name, "Only instances have fields")
+
+        val value = evaluate(expr.value)
+        obj.set(expr.name, value)
+        return value
     }
 
     override fun visitUnaryExpr(expr: Unary): LoxValue {

@@ -3,9 +3,8 @@ package be.tjoener.jlox.parser
 import be.tjoener.jlox.JLox
 import be.tjoener.jlox.ast.*
 import be.tjoener.jlox.ast.Function
+import be.tjoener.jlox.ast.Set
 import be.tjoener.jlox.parser.TokenType.*
-import be.tjoener.jlox.ast.Stmt
-import java.util.ArrayList
 
 
 class Parser(private val tokens: List<Token>) {
@@ -196,6 +195,8 @@ class Parser(private val tokens: List<Token>) {
 
             if (expr is Variable) {
                 return Assign(expr.name, value)
+            } else if (expr is Get) {
+                return Set(expr.obj, expr.name, value)
             }
 
             error(equals, "Invalid assignment target")
@@ -291,6 +292,9 @@ class Parser(private val tokens: List<Token>) {
         while (true) {
             if (match(LEFT_PAREN)) {
                 expr = finishCall(expr)
+            } else if (match(DOT)) {
+                val name = consume(IDENTIFIER, "Expect property name after '.'")
+                expr = Get(expr, name)
             } else {
                 break
             }

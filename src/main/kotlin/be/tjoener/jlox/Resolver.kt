@@ -2,6 +2,7 @@ package be.tjoener.jlox
 
 import be.tjoener.jlox.ast.*
 import be.tjoener.jlox.ast.Function
+import be.tjoener.jlox.ast.Set
 import be.tjoener.jlox.parser.Token
 import java.util.*
 
@@ -34,6 +35,10 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     override fun visitExpressionStmt(stmt: Expression) {
         resolve(stmt.expression)
+    }
+
+    override fun visitGetExpr(expr: Get) {
+        resolve(expr.obj)
     }
 
     override fun visitFunctionStmt(stmt: Function) {
@@ -106,6 +111,11 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
     override fun visitLogicalExpr(expr: Logical) {
         resolve(expr.left)
         resolve(expr.right)
+    }
+
+    override fun visitSetExpr(expr: Set) {
+        resolve(expr.value)
+        resolve(expr.obj)
     }
 
     override fun visitUnaryExpr(expr: Unary) {

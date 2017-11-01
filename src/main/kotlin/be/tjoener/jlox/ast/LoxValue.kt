@@ -3,6 +3,8 @@ package be.tjoener.jlox.ast
 import be.tjoener.jlox.Environment
 import be.tjoener.jlox.Interpreter
 import be.tjoener.jlox.Interpreter.ReturnValue
+import be.tjoener.jlox.RuntimeError
+import be.tjoener.jlox.parser.Token
 
 sealed class LoxValue {
 
@@ -71,5 +73,16 @@ class LoxClass(val name: String) : LoxCallable() {
 }
 
 class LoxInstance(val klass: LoxClass) : LoxValue() {
+    private val fields = mutableMapOf<String, LoxValue>()
+
+    fun get(name: Token): LoxValue {
+        return fields[name.lexeme]
+            ?: throw RuntimeError(name, "Undefined property '${name.lexeme}'")
+    }
+
+    fun set(name: Token, value: LoxValue) {
+        fields.put(name.lexeme, value)
+    }
+
     override fun toString() = "${klass.name} instance"
 }
