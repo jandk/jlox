@@ -8,6 +8,8 @@ import java.util.*
 
 class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
+    class ReturnValue(val value: LoxValue) : RuntimeException(null, null, false, false)
+
     internal val globals = Environment()
     private var environment = globals
 
@@ -122,6 +124,11 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     override fun visitFunctionStmt(stmt: Function) {
         val function = LoxFunction(stmt)
         environment.define(stmt.name.lexeme, function)
+    }
+
+    override fun visitReturnStmt(stmt: Return) {
+        val value = if (stmt.value == null) LoxNil else evaluate(stmt.value)
+        throw ReturnValue(value)
     }
 
 

@@ -2,6 +2,7 @@ package be.tjoener.jlox.ast
 
 import be.tjoener.jlox.Environment
 import be.tjoener.jlox.Interpreter
+import be.tjoener.jlox.Interpreter.ReturnValue
 
 sealed class LoxValue {
 
@@ -44,7 +45,11 @@ class LoxFunction(private val declaration: Function) : LoxCallable() {
             environment.define(declaration.parameters[i].lexeme, arguments[i])
         }
 
-        interpreter.executeBlock(declaration.body, environment)
+        try {
+            interpreter.executeBlock(declaration.body, environment)
+        } catch (returnValue: ReturnValue) {
+            return returnValue.value
+        }
         return LoxNil
     }
 
