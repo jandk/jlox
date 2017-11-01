@@ -17,12 +17,12 @@ object GenerateAst {
 
         defineAst(outputDir, "Expr", listOf(
             "Assign   : Token name, Expr value",
-            "Unary    : Token operator, Expr right",
             "Binary   : Expr left, Token operator, Expr right",
-            "Logical  : Expr left, Token operator, Expr right",
             "Call     : Expr callee, Token paren, List<Expr> arguments",
-            "Literal  : Any? value",
             "Grouping : Expr expression",
+            "Literal  : Any? value",
+            "Logical  : Expr left, Token operator, Expr right",
+            "Unary    : Token operator, Expr right",
             "Variable : Token name"
         ))
 

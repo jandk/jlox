@@ -5,7 +5,7 @@ import be.tjoener.jlox.ast.Function
 import be.tjoener.jlox.parser.Token
 import java.util.*
 
-class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<Unit> {
+class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<Unit> {
 
     private enum class FunctionType {
         NONE, FUNCTION
@@ -20,31 +20,15 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
         }
     }
 
+
     override fun visitBlockStmt(stmt: Block) {
         beginScope()
         resolve(stmt.statements)
         endScope()
     }
 
-    override fun visitVarStmt(stmt: Var) {
-        declare(stmt.name)
-        if (stmt.initializer != null) {
-            resolve(stmt.initializer)
-        }
-        define(stmt.name)
-    }
-
-    override fun visitVariableExpr(expr: Variable) {
-        if (!scopes.isEmpty() && scopes.peek()[expr.name.lexeme] == false) {
-            JLox.error(expr.name, "Cannot read local variable in its own initializer")
-        }
-
-        resolveLocal(expr, expr.name)
-    }
-
-    override fun visitAssignExpr(expr: Assign) {
-        resolve(expr.value)
-        resolveLocal(expr, expr.name)
+    override fun visitExpressionStmt(stmt: Expression) {
+        resolve(stmt.expression)
     }
 
     override fun visitFunctionStmt(stmt: Function) {
@@ -52,23 +36,6 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
         define(stmt.name)
 
         resolveFunction(stmt, FunctionType.FUNCTION)
-    }
-
-    private fun resolveFunction(function: Function, type: FunctionType) {
-        val enclosingFunction = currentFunction
-        beginScope()
-        for (parameter in function.parameters) {
-            declare(parameter)
-            define(parameter)
-        }
-        resolve(function.body)
-        endScope()
-        currentFunction = enclosingFunction
-    }
-
-
-    override fun visitExpressionStmt(stmt: Expression) {
-        resolve(stmt.expression)
     }
 
     override fun visitIfStmt(stmt: If) {
@@ -93,11 +60,24 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
         }
     }
 
+    override fun visitVarStmt(stmt: Var) {
+        declare(stmt.name)
+        if (stmt.initializer != null) {
+            resolve(stmt.initializer)
+        }
+        define(stmt.name)
+    }
+
     override fun visitWhileStmt(stmt: While) {
         resolve(stmt.condition)
         resolve(stmt.body)
     }
 
+
+    override fun visitAssignExpr(expr: Assign) {
+        resolve(expr.value)
+        resolveLocal(expr, expr.name)
+    }
 
     override fun visitBinaryExpr(expr: Binary) {
         resolve(expr.left)
@@ -127,6 +107,22 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
         resolve(expr.right)
     }
 
+    override fun visitVariableExpr(expr: Variable) {
+        if (!scopes.isEmpty() && scopes.peek()[expr.name.lexeme] == false) {
+            JLox.error(expr.name, "Cannot read local variable in its own initializer")
+        }
+
+        resolveLocal(expr, expr.name)
+    }
+
+
+    private fun resolve(stmt: Stmt) {
+        stmt.accept(this)
+    }
+
+    private fun resolve(expr: Expr) {
+        expr.accept(this)
+    }
 
     private fun resolveLocal(expr: Expr, name: Token) {
         for (i in scopes.size - 1 downTo 0) {
@@ -137,12 +133,16 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
         }
     }
 
-    private fun resolve(stmt: Stmt) {
-        stmt.accept(this)
-    }
-
-    private fun resolve(expr: Expr) {
-        expr.accept(this)
+    private fun resolveFunction(function: Function, type: FunctionType) {
+        val enclosingFunction = currentFunction
+        beginScope()
+        for (parameter in function.parameters) {
+            declare(parameter)
+            define(parameter)
+        }
+        resolve(function.body)
+        endScope()
+        currentFunction = enclosingFunction
     }
 
 
@@ -153,7 +153,6 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
     private fun endScope() {
         scopes.pop()
     }
-
 
     private fun declare(name: Token) {
         if (scopes.isEmpty()) return
@@ -168,6 +167,5 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
         if (scopes.isEmpty()) return
         scopes.peek().put(name.lexeme, true)
     }
-
 
 }

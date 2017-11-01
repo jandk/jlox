@@ -15,7 +15,6 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
     private var environment = globals
 
-
     init {
         globals.define("clock", object : LoxCallable() {
             override val arity: Int
@@ -27,6 +26,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         })
     }
 
+
     fun interpret(statements: List<Stmt>) {
         try {
             for (statement in statements) {
@@ -37,66 +37,6 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         }
     }
 
-    private fun stringify(value: LoxValue): String {
-        if (value is LoxDouble) {
-            return value.toString().removeSuffix(".0")
-        }
-        return value.toString()
-    }
-
-
-    private fun evaluate(expr: Expr): LoxValue {
-        return expr.accept(this)
-    }
-
-    private fun execute(stmt: Stmt) {
-        stmt.accept(this)
-    }
-
-    private fun lookupVariable(name: Token, expr: Expr): LoxValue {
-        val distance = locals[expr]
-        return if (distance != null) {
-            environment.getAt(distance, name.lexeme)
-        } else {
-            globals.get(name)
-        }
-    }
-
-    internal fun executeBlock(statements: List<Stmt>, environment: Environment) {
-        val previous = this.environment
-        try {
-            this.environment = environment
-
-            for (statement in statements) {
-                execute(statement)
-            }
-        } finally {
-            this.environment = previous
-        }
-    }
-
-    internal fun resolve(expr: Expr, depth: Int) {
-        locals.put(expr, depth)
-    }
-
-
-    override fun visitExpressionStmt(stmt: Expression) {
-        evaluate(stmt.expression)
-    }
-
-    override fun visitPrintStmt(stmt: Print) {
-        val value = evaluate(stmt.expression)
-        println(stringify(value))
-    }
-
-    override fun visitVarStmt(stmt: Var) {
-        var value: LoxValue = LoxNil
-        if (stmt.initializer != null) {
-            value = evaluate(stmt.initializer)
-        }
-
-        environment.define(stmt.name.lexeme, value)
-    }
 
     override fun visitAssignExpr(expr: Assign): LoxValue {
         val value = evaluate(expr.value)
@@ -110,92 +50,6 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
         environment.assign(expr.name, value)
         return value
-    }
-
-    override fun visitBlockStmt(stmt: Block) {
-        executeBlock(stmt.statements, Environment(environment))
-    }
-
-    override fun visitIfStmt(stmt: If) {
-        if (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.thenBranch)
-        } else if (stmt.elseBranch != null) {
-            execute(stmt.elseBranch)
-        }
-    }
-
-    override fun visitWhileStmt(stmt: While) {
-        while (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body)
-        }
-    }
-
-    override fun visitCallExpr(expr: Call): LoxValue {
-        val callee = evaluate(expr.callee)
-        val arguments = expr.arguments.map { evaluate(it) }
-
-        val function = callee as? LoxCallable
-            ?: throw RuntimeError(expr.paren, "Can only call functions and classes")
-
-        if (arguments.size != function.arity) {
-            throw RuntimeError(expr.paren, "Expected ${function.arity} arguments but got ${arguments.size}")
-        }
-
-        return function.call(this, arguments)
-    }
-
-    override fun visitFunctionStmt(stmt: Function) {
-        val function = LoxFunction(stmt, environment)
-        environment.define(stmt.name.lexeme, function)
-    }
-
-    override fun visitReturnStmt(stmt: Return) {
-        val value = if (stmt.value == null) LoxNil else evaluate(stmt.value)
-        throw ReturnValue(value)
-    }
-
-
-    override fun visitLogicalExpr(expr: Logical): LoxValue {
-        val left = evaluate(expr.left)
-
-        if (expr.operator.type == OR) {
-            if (isTruthy(left)) return left
-        } else {
-            if (!isTruthy(left)) return left
-        }
-
-        return evaluate(expr.right)
-    }
-
-    override fun visitVariableExpr(expr: Variable): LoxValue {
-        return lookupVariable(expr.name, expr)
-    }
-
-    override fun visitLiteralExpr(expr: Literal): LoxValue {
-        return when (expr.value) {
-            null -> LoxNil
-            is Boolean -> LoxBool(expr.value)
-            is Double -> LoxDouble(expr.value)
-            is String -> LoxString(expr.value)
-            else -> error("Invalid literal type")
-        }
-    }
-
-    override fun visitGroupingExpr(expr: Grouping): LoxValue {
-        return evaluate(expr.expression)
-    }
-
-    override fun visitUnaryExpr(expr: Unary): LoxValue {
-        val right = evaluate(expr.right)
-
-        return when (expr.operator.type) {
-            BANG -> LoxBool(!isTruthy(right))
-            MINUS -> {
-                checkNumberOperand(expr.operator, right)
-                LoxDouble(-right.asDouble())
-            }
-            else -> throw NotImplementedError()
-        }
     }
 
     override fun visitBinaryExpr(expr: Binary): LoxValue {
@@ -251,15 +105,161 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         }
     }
 
+    override fun visitCallExpr(expr: Call): LoxValue {
+        val callee = evaluate(expr.callee)
+        val arguments = expr.arguments.map { evaluate(it) }
+
+        val function = callee as? LoxCallable
+            ?: throw RuntimeError(expr.paren, "Can only call functions and classes")
+
+        if (arguments.size != function.arity) {
+            throw RuntimeError(expr.paren, "Expected ${function.arity} arguments but got ${arguments.size}")
+        }
+
+        return function.call(this, arguments)
+    }
+
+    override fun visitGroupingExpr(expr: Grouping): LoxValue {
+        return evaluate(expr.expression)
+    }
+
+    override fun visitLiteralExpr(expr: Literal): LoxValue {
+        return when (expr.value) {
+            null -> LoxNil
+            is Boolean -> LoxBool(expr.value)
+            is Double -> LoxDouble(expr.value)
+            is String -> LoxString(expr.value)
+            else -> error("Invalid literal type")
+        }
+    }
+
+    override fun visitLogicalExpr(expr: Logical): LoxValue {
+        val left = evaluate(expr.left)
+
+        if (expr.operator.type == OR) {
+            if (isTruthy(left)) return left
+        } else {
+            if (!isTruthy(left)) return left
+        }
+
+        return evaluate(expr.right)
+    }
+
+    override fun visitUnaryExpr(expr: Unary): LoxValue {
+        val right = evaluate(expr.right)
+
+        return when (expr.operator.type) {
+            BANG -> LoxBool(!isTruthy(right))
+            MINUS -> {
+                checkNumberOperand(expr.operator, right)
+                LoxDouble(-right.asDouble())
+            }
+            else -> throw NotImplementedError()
+        }
+    }
+
+    override fun visitVariableExpr(expr: Variable): LoxValue {
+        return lookupVariable(expr.name, expr)
+    }
+
+
+    override fun visitBlockStmt(stmt: Block) {
+        executeBlock(stmt.statements, Environment(environment))
+    }
+
+    override fun visitExpressionStmt(stmt: Expression) {
+        evaluate(stmt.expression)
+    }
+
+    override fun visitFunctionStmt(stmt: Function) {
+        val function = LoxFunction(stmt, environment)
+        environment.define(stmt.name.lexeme, function)
+    }
+
+    override fun visitIfStmt(stmt: If) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch)
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch)
+        }
+    }
+
+    override fun visitPrintStmt(stmt: Print) {
+        val value = evaluate(stmt.expression)
+        println(stringify(value))
+    }
+
+    override fun visitReturnStmt(stmt: Return) {
+        val value = if (stmt.value == null) LoxNil else evaluate(stmt.value)
+        throw ReturnValue(value)
+    }
+
+    override fun visitVarStmt(stmt: Var) {
+        var value: LoxValue = LoxNil
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer)
+        }
+
+        environment.define(stmt.name.lexeme, value)
+    }
+
+    override fun visitWhileStmt(stmt: While) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.body)
+        }
+    }
+
+
+    internal fun executeBlock(statements: List<Stmt>, environment: Environment) {
+        val previous = this.environment
+        try {
+            this.environment = environment
+
+            for (statement in statements) {
+                execute(statement)
+            }
+        } finally {
+            this.environment = previous
+        }
+    }
+
+    internal fun resolve(expr: Expr, depth: Int) {
+        locals.put(expr, depth)
+    }
+
+
+    private fun evaluate(expr: Expr): LoxValue {
+        return expr.accept(this)
+    }
+
+    private fun execute(stmt: Stmt) {
+        stmt.accept(this)
+    }
+
+    private fun lookupVariable(name: Token, expr: Expr): LoxValue {
+        val distance = locals[expr]
+        return if (distance != null) {
+            environment.getAt(distance, name.lexeme)
+        } else {
+            globals.get(name)
+        }
+    }
+
+    private fun stringify(value: LoxValue): String {
+        if (value is LoxDouble) {
+            return value.toString().removeSuffix(".0")
+        }
+        return value.toString()
+    }
+
+    private fun isEqual(left: LoxValue, right: LoxValue): Boolean {
+        return Objects.equals(left, right)
+    }
 
     private fun isTruthy(value: LoxValue): Boolean {
         if (value is LoxNil) return false
         if (value is LoxBool) return value.value
         return true
-    }
-
-    private fun isEqual(left: LoxValue, right: LoxValue): Boolean {
-        return Objects.equals(left, right)
     }
 
     private fun checkNumberOperand(operator: Token, operand: LoxValue) {
