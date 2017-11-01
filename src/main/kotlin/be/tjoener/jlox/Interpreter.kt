@@ -1,13 +1,14 @@
 package be.tjoener.jlox
 
 import be.tjoener.jlox.ast.*
+import be.tjoener.jlox.ast.Function
 import be.tjoener.jlox.parser.Token
 import be.tjoener.jlox.parser.TokenType.*
 import java.util.*
 
 class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
-    private val globals = Environment()
+    internal val globals = Environment()
     private var environment = globals
 
     init {
@@ -47,7 +48,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         stmt.accept(this)
     }
 
-    private fun executeBlock(statements: List<Stmt>, environment: Environment) {
+    internal fun executeBlock(statements: List<Stmt>, environment: Environment) {
         val previous = this.environment
         try {
             this.environment = environment
@@ -116,6 +117,11 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         }
 
         return function.call(this, arguments)
+    }
+
+    override fun visitFunctionStmt(stmt: Function) {
+        val function = LoxFunction(stmt)
+        environment.define(stmt.name.lexeme, function)
     }
 
 
