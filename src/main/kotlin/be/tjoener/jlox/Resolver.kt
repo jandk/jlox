@@ -9,7 +9,7 @@ import java.util.*
 class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<Unit> {
 
     private enum class FunctionType {
-        NONE, FUNCTION, METHOD
+        NONE, FUNCTION, INITIALIZER, METHOD
     }
 
     private enum class ClassType {
@@ -38,11 +38,16 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         define(stmt.name)
 
         val enclosingClass = currentClass
+        currentClass = ClassType.CLASS
         beginScope()
 
         scopes.peek().put("this", true)
         for (method in stmt.methods) {
-            resolveFunction(method, FunctionType.METHOD)
+            val declaration =
+                if (method.name.lexeme == "init") FunctionType.INITIALIZER
+                else FunctionType.METHOD
+
+            resolveFunction(method, declaration)
         }
 
         endScope()
@@ -82,6 +87,9 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         }
 
         if (stmt.value != null) {
+            if (currentFunction == FunctionType.INITIALIZER) {
+                JLox.error(stmt.keyword, "Cannot return a value from an initializer")
+            }
             resolve(stmt.value)
         }
     }
@@ -173,6 +181,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     private fun resolveFunction(function: Function, type: FunctionType) {
         val enclosingFunction = currentFunction
+        currentFunction = type
         beginScope()
         for (parameter in function.parameters) {
             declare(parameter)

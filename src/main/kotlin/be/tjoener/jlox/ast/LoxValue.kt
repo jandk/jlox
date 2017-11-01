@@ -37,7 +37,11 @@ abstract class LoxCallable : LoxValue() {
     abstract fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue
 }
 
-class LoxFunction(private val declaration: Function, private val closure: Environment) : LoxCallable() {
+class LoxFunction(
+    val declaration: Function,
+    val closure: Environment,
+    val isInitializer: Boolean
+) : LoxCallable() {
     override val arity: Int
         get() = declaration.parameters.size
 
@@ -52,13 +56,15 @@ class LoxFunction(private val declaration: Function, private val closure: Enviro
         } catch (returnValue: ReturnValue) {
             return returnValue.value
         }
+
+        if (isInitializer) return closure.getAt(0, "this")
         return LoxNil
     }
 
     fun bind(instance: LoxInstance): LoxFunction {
         val environment = Environment(closure)
         environment.define("this", instance)
-        return LoxFunction(declaration, environment)
+        return LoxFunction(declaration, environment, isInitializer)
     }
 
     override fun toString(): String {
@@ -68,10 +74,13 @@ class LoxFunction(private val declaration: Function, private val closure: Enviro
 
 class LoxClass(val name: String, val methods: Map<String, LoxFunction>) : LoxCallable() {
     override val arity: Int
-        get() = 0
+        get() = methods["init"]?.arity ?: 0
 
     override fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue {
         val instance = LoxInstance(this)
+        methods["init"]
+            ?.bind(instance)
+            ?.call(interpreter, arguments)
         return instance
     }
 
