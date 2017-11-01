@@ -58,6 +58,18 @@ class LoxFunction(private val declaration: Function, private val closure: Enviro
     }
 }
 
-class LoxClass(val name: String) : LoxValue() {
+class LoxClass(val name: String) : LoxCallable() {
+    override val arity: Int
+        get() = 0
+
+    override fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue {
+        val instance = LoxInstance(this)
+        return instance
+    }
+
     override fun toString() = name
+}
+
+class LoxInstance(val klass: LoxClass) : LoxValue() {
+    override fun toString() = "${klass.name} instance"
 }
