@@ -7,7 +7,12 @@ import java.util.*
 
 class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<Unit> {
 
+    private enum class FunctionType {
+        NONE, FUNCTION
+    }
+
     private val scopes: Stack<MutableMap<String, Boolean>> = Stack()
+    private var currentFunction: FunctionType = FunctionType.NONE
 
     fun resolve(statements: List<Stmt>) {
         for (statement in statements) {
@@ -46,10 +51,11 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
         declare(stmt.name)
         define(stmt.name)
 
-        resolveFunction(stmt)
+        resolveFunction(stmt, FunctionType.FUNCTION)
     }
 
-    private fun resolveFunction(function: Function) {
+    private fun resolveFunction(function: Function, type: FunctionType) {
+        val enclosingFunction = currentFunction
         beginScope()
         for (parameter in function.parameters) {
             declare(parameter)
@@ -57,6 +63,7 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
         }
         resolve(function.body)
         endScope()
+        currentFunction = enclosingFunction
     }
 
 
@@ -77,6 +84,10 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
     }
 
     override fun visitReturnStmt(stmt: Return) {
+        if (currentFunction == FunctionType.NONE) {
+            JLox.error(stmt.keyword, "Cannot return from top-level code.");
+        }
+
         if (stmt.value != null) {
             resolve(stmt.value)
         }
@@ -146,7 +157,11 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
 
     private fun declare(name: Token) {
         if (scopes.isEmpty()) return
-        scopes.peek().put(name.lexeme, false)
+        val scope = scopes.peek()
+        if (scope.containsKey(name.lexeme)) {
+            JLox.error(name, "Variable with this name already declared in this scope")
+        }
+        scope.put(name.lexeme, false)
     }
 
     private fun define(name: Token) {

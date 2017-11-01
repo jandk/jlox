@@ -41,14 +41,19 @@ object JLox {
     }
 
     private fun run(source: String) {
-        val tokens = Scanner(source).scanTokens()
-        val statements = Parser(tokens).parse()
+        val scanner = Scanner(source)
+        val tokens = scanner.scanTokens()
+        val parser = Parser(tokens)
+        val statements = parser.parse()
 
         // Stop if there was a syntax error
         if (hadError) return
 
         val resolver = Resolver(interpreter)
         resolver.resolve(statements)
+
+        // Stop if there was a resolution error
+        if (hadError) return;
 
         interpreter.interpret(statements)
     }
