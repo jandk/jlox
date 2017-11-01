@@ -35,12 +35,12 @@ abstract class LoxCallable : LoxValue() {
     abstract fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue
 }
 
-class LoxFunction(private val declaration: Function) : LoxCallable() {
+class LoxFunction(private val declaration: Function, private val closure: Environment) : LoxCallable() {
     override val arity: Int
         get() = declaration.parameters.size
 
     override fun call(interpreter: Interpreter, arguments: List<LoxValue>): LoxValue {
-        val environment = Environment(interpreter.globals)
+        val environment = Environment(closure)
         for (i in 0 until declaration.parameters.size) {
             environment.define(declaration.parameters[i].lexeme, arguments[i])
         }
