@@ -9,6 +9,12 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
 
     private val scopes: Stack<MutableMap<String, Boolean>> = Stack()
 
+    fun resolve(statements: List<Stmt>) {
+        for (statement in statements) {
+            resolve(statement)
+        }
+    }
+
     override fun visitBlockStmt(stmt: Block) {
         beginScope()
         resolve(stmt.statements)
@@ -117,12 +123,6 @@ class Resolver(val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<
                 interpreter.resolve(expr, scopes.size - 1 - i)
                 return
             }
-        }
-    }
-
-    private fun resolve(statements: List<Stmt>) {
-        for (statement in statements) {
-            resolve(statement)
         }
     }
 

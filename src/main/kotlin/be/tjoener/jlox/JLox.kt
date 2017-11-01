@@ -47,6 +47,9 @@ object JLox {
         // Stop if there was a syntax error
         if (hadError) return
 
+        val resolver = Resolver(interpreter)
+        resolver.resolve(statements)
+
         interpreter.interpret(statements)
     }
 

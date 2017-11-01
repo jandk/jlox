@@ -11,7 +11,10 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     class ReturnValue(val value: LoxValue) : RuntimeException(null, null, false, false)
 
     private val globals = Environment()
+    private val locals = mutableMapOf<Expr, Int>()
+
     private var environment = globals
+
 
     init {
         globals.define("clock", object : LoxCallable() {
@@ -50,6 +53,15 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         stmt.accept(this)
     }
 
+    private fun lookupVariable(name: Token, expr: Expr): LoxValue {
+        val distance = locals[expr]
+        return if (distance != null) {
+            environment.getAt(distance, name.lexeme)
+        } else {
+            globals.get(name)
+        }
+    }
+
     internal fun executeBlock(statements: List<Stmt>, environment: Environment) {
         val previous = this.environment
         try {
@@ -64,7 +76,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     internal fun resolve(expr: Expr, depth: Int) {
-        TODO()
+        locals.put(expr, depth)
     }
 
 
@@ -88,6 +100,13 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
 
     override fun visitAssignExpr(expr: Assign): LoxValue {
         val value = evaluate(expr.value)
+
+        val distance = locals.get(expr)
+        if (distance != null) {
+            environment.assignAt(distance, expr.name, value)
+        } else {
+            globals.assign(expr.name, value)
+        }
 
         environment.assign(expr.name, value)
         return value
@@ -149,7 +168,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     override fun visitVariableExpr(expr: Variable): LoxValue {
-        return environment.get(expr.name)
+        return lookupVariable(expr.name, expr)
     }
 
     override fun visitLiteralExpr(expr: Literal): LoxValue {

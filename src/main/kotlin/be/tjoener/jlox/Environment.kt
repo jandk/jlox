@@ -1,5 +1,6 @@
 package be.tjoener.jlox
 
+import be.tjoener.jlox.ast.LoxNil
 import be.tjoener.jlox.ast.LoxValue
 import be.tjoener.jlox.parser.Token
 
@@ -24,6 +25,10 @@ class Environment(val enclosing: Environment? = null) {
         throw RuntimeError(name, "Undefined variable '${name.lexeme}'")
     }
 
+    fun getAt(distance: Int, name: String): LoxValue {
+        return ancestor(distance).values.getOrDefault(name, LoxNil)
+    }
+
     fun assign(name: Token, value: LoxValue) {
         if (values.containsKey(name.lexeme)) {
             values.put(name.lexeme, value)
@@ -36,6 +41,19 @@ class Environment(val enclosing: Environment? = null) {
         }
 
         throw RuntimeError(name, "Undefined variable '${name.lexeme}'")
+    }
+
+    fun assignAt(distance: Int, name: Token, value: LoxValue) {
+        ancestor(distance).values.put(name.lexeme, value)
+    }
+
+    fun ancestor(distance: Int): Environment {
+        var environment: Environment = this
+        for (i in 0 until distance) {
+            environment = environment.enclosing!!
+        }
+
+        return environment
     }
 
 }
