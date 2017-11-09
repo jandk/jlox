@@ -1,10 +1,10 @@
-package be.tjoener.jlox.parser
+package be.tjoener.klox.parser
 
-import be.tjoener.jlox.JLox
-import be.tjoener.jlox.ast.*
-import be.tjoener.jlox.ast.Function
-import be.tjoener.jlox.ast.Set
-import be.tjoener.jlox.parser.TokenType.*
+import be.tjoener.klox.KLox
+import be.tjoener.klox.ast.*
+import be.tjoener.klox.ast.Function
+import be.tjoener.klox.ast.Set
+import be.tjoener.klox.parser.TokenType.*
 
 
 class Parser(private val tokens: List<Token>) {
@@ -373,7 +373,7 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun error(token: Token, message: String): ParseError {
-        JLox.error(token, message)
+        KLox.error(token, message)
         throw ParseError()
     }
 

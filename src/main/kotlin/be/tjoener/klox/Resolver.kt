@@ -1,9 +1,9 @@
-package be.tjoener.jlox
+package be.tjoener.klox
 
-import be.tjoener.jlox.ast.*
-import be.tjoener.jlox.ast.Function
-import be.tjoener.jlox.ast.Set
-import be.tjoener.jlox.parser.Token
+import be.tjoener.klox.ast.*
+import be.tjoener.klox.ast.Function
+import be.tjoener.klox.ast.Set
+import be.tjoener.klox.parser.Token
 import java.util.*
 
 class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.Visitor<Unit> {
@@ -83,12 +83,12 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     override fun visitReturnStmt(stmt: Return) {
         if (currentFunction == FunctionType.NONE) {
-            JLox.error(stmt.keyword, "Cannot return from top-level code.");
+            KLox.error(stmt.keyword, "Cannot return from top-level code.");
         }
 
         if (stmt.value != null) {
             if (currentFunction == FunctionType.INITIALIZER) {
-                JLox.error(stmt.keyword, "Cannot return a value from an initializer")
+                KLox.error(stmt.keyword, "Cannot return a value from an initializer")
             }
             resolve(stmt.value)
         }
@@ -144,7 +144,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     override fun visitThisExpr(expr: This) {
         if (currentClass == ClassType.NONE) {
-            JLox.error(expr.keyword, "Cannot use 'this' outside of a class")
+            KLox.error(expr.keyword, "Cannot use 'this' outside of a class")
         }
         resolveLocal(expr, expr.keyword)
     }
@@ -155,7 +155,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     override fun visitVariableExpr(expr: Variable) {
         if (!scopes.isEmpty() && scopes.peek()[expr.name.lexeme] == false) {
-            JLox.error(expr.name, "Cannot read local variable in its own initializer")
+            KLox.error(expr.name, "Cannot read local variable in its own initializer")
         }
 
         resolveLocal(expr, expr.name)
@@ -205,7 +205,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         if (scopes.isEmpty()) return
         val scope = scopes.peek()
         if (scope.containsKey(name.lexeme)) {
-            JLox.error(name, "Variable with this name already declared in this scope")
+            KLox.error(name, "Variable with this name already declared in this scope")
         }
         scope.put(name.lexeme, false)
     }

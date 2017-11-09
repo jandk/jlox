@@ -1,10 +1,10 @@
-package be.tjoener.jlox
+package be.tjoener.klox
 
-import be.tjoener.jlox.ast.*
-import be.tjoener.jlox.ast.Function
-import be.tjoener.jlox.ast.Set
-import be.tjoener.jlox.parser.Token
-import be.tjoener.jlox.parser.TokenType.*
+import be.tjoener.klox.ast.*
+import be.tjoener.klox.ast.Function
+import be.tjoener.klox.ast.Set
+import be.tjoener.klox.parser.Token
+import be.tjoener.klox.parser.TokenType.*
 import java.util.*
 
 class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
@@ -34,7 +34,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
                 execute(statement)
             }
         } catch (error: RuntimeError) {
-            JLox.runtimeError(error)
+            KLox.runtimeError(error)
         }
     }
 

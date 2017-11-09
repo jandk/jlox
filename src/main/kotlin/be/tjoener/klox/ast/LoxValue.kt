@@ -1,10 +1,10 @@
-package be.tjoener.jlox.ast
+package be.tjoener.klox.ast
 
-import be.tjoener.jlox.Environment
-import be.tjoener.jlox.Interpreter
-import be.tjoener.jlox.Interpreter.ReturnValue
-import be.tjoener.jlox.RuntimeError
-import be.tjoener.jlox.parser.Token
+import be.tjoener.klox.Environment
+import be.tjoener.klox.Interpreter
+import be.tjoener.klox.Interpreter.ReturnValue
+import be.tjoener.klox.RuntimeError
+import be.tjoener.klox.parser.Token
 
 sealed class LoxValue {
 

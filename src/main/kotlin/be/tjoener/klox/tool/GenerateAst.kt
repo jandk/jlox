@@ -1,4 +1,4 @@
-package be.tjoener.jlox.tool
+package be.tjoener.klox.tool
 
 import java.io.File
 import java.io.PrintWriter
@@ -44,9 +44,9 @@ object GenerateAst {
 
     private fun defineAst(outputDir: String, baseName: String, types: List<String>) {
         File("$outputDir/$baseName.kt").printWriter().use {
-            it.println("package be.tjoener.jlox.ast")
+            it.println("package be.tjoener.klox.ast")
             it.println()
-            it.println("import be.tjoener.jlox.parser.Token")
+            it.println("import be.tjoener.klox.parser.Token")
             it.println()
             it.println("sealed class $baseName {")
             it.println("    abstract fun <R> accept(visitor: Visitor<R>): R")

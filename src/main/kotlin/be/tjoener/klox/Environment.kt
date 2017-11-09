@@ -1,8 +1,8 @@
-package be.tjoener.jlox
+package be.tjoener.klox
 
-import be.tjoener.jlox.ast.LoxNil
-import be.tjoener.jlox.ast.LoxValue
-import be.tjoener.jlox.parser.Token
+import be.tjoener.klox.ast.LoxNil
+import be.tjoener.klox.ast.LoxValue
+import be.tjoener.klox.parser.Token
 
 class Environment(val enclosing: Environment? = null) {
 

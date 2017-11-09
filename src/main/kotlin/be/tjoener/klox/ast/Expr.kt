@@ -1,6 +1,6 @@
-package be.tjoener.jlox.ast
+package be.tjoener.klox.ast
 
-import be.tjoener.jlox.parser.Token
+import be.tjoener.klox.parser.Token
 
 sealed class Expr {
     abstract fun <R> accept(visitor: Visitor<R>): R

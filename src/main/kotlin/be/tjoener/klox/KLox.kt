@@ -1,20 +1,20 @@
-package be.tjoener.jlox
+package be.tjoener.klox
 
-import be.tjoener.jlox.parser.Parser
-import be.tjoener.jlox.parser.Scanner
-import be.tjoener.jlox.parser.Token
-import be.tjoener.jlox.parser.TokenType
+import be.tjoener.klox.parser.Parser
+import be.tjoener.klox.parser.Scanner
+import be.tjoener.klox.parser.Token
+import be.tjoener.klox.parser.TokenType
 import java.io.File
 import kotlin.system.exitProcess
 
-object JLox {
+object KLox {
 
     private val interpreter: Interpreter = Interpreter()
 
     @JvmStatic
     fun main(args: Array<String>) {
         if (args.size > 1) {
-            println("Usage: jlox [script]")
+            println("Usage: klox [script]")
         } else if (args.size == 1) {
             runFile(args[0])
         } else {

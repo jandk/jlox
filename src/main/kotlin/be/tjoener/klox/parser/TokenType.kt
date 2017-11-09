@@ -1,4 +1,4 @@
-package be.tjoener.jlox.parser
+package be.tjoener.klox.parser
 
 enum class TokenType {
     // Single-character tokens.

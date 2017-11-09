@@ -1,7 +1,7 @@
-package be.tjoener.jlox.parser
+package be.tjoener.klox.parser
 
-import be.tjoener.jlox.JLox
-import be.tjoener.jlox.parser.TokenType.*
+import be.tjoener.klox.KLox
+import be.tjoener.klox.parser.TokenType.*
 
 
 class Scanner(private val source: String) {
@@ -61,7 +61,7 @@ class Scanner(private val source: String) {
                 } else if (isAlpha(c)) {
                     identifier()
                 } else {
-                    JLox.error(line, "Unexpected character")
+                    KLox.error(line, "Unexpected character")
                 }
             }
         }
@@ -75,7 +75,7 @@ class Scanner(private val source: String) {
 
         // Unterminated string
         if (isAtEnd()) {
-            JLox.error(line, "Unterminated string")
+            KLox.error(line, "Unterminated string")
             return
         }
 
