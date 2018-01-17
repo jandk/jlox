@@ -42,7 +42,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     override fun visitAssignExpr(expr: Assign): LoxValue {
         val value = evaluate(expr.value)
 
-        val distance = locals.get(expr)
+        val distance = locals[expr]
         if (distance != null) {
             environment.assignAt(distance, expr.name, value)
         } else {
@@ -197,7 +197,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
         for (method in stmt.methods) {
             val isInitializer = method.name.lexeme == "init"
             val function = LoxFunction(method, environment, isInitializer)
-            methods.put(method.name.lexeme, function)
+            methods[method.name.lexeme] = function
         }
 
         val klass = LoxClass(stmt.name.lexeme, methods)
@@ -261,7 +261,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     internal fun resolve(expr: Expr, depth: Int) {
-        locals.put(expr, depth)
+        locals[expr] = depth
     }
 
 
@@ -294,7 +294,7 @@ class Interpreter : Expr.Visitor<LoxValue>, Stmt.Visitor<Unit> {
     }
 
     private fun isTruthy(value: LoxValue): Boolean {
-        if (value is LoxNil) return false
+        if (value == LoxNil) return false
         if (value is LoxBool) return value.value
         return true
     }

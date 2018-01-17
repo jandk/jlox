@@ -41,7 +41,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         currentClass = ClassType.CLASS
         beginScope()
 
-        scopes.peek().put("this", true)
+        scopes.peek()["this"] = true
         for (method in stmt.methods) {
             val declaration =
                 if (method.name.lexeme == "init") FunctionType.INITIALIZER
@@ -83,7 +83,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     override fun visitReturnStmt(stmt: Return) {
         if (currentFunction == FunctionType.NONE) {
-            KLox.error(stmt.keyword, "Cannot return from top-level code.");
+            KLox.error(stmt.keyword, "Cannot return from top-level code.")
         }
 
         if (stmt.value != null) {
@@ -207,12 +207,12 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         if (scope.containsKey(name.lexeme)) {
             KLox.error(name, "Variable with this name already declared in this scope")
         }
-        scope.put(name.lexeme, false)
+        scope[name.lexeme] = false
     }
 
     private fun define(name: Token) {
         if (scopes.isEmpty()) return
-        scopes.peek().put(name.lexeme, true)
+        scopes.peek()[name.lexeme] = true
     }
 
 }

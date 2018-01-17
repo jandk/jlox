@@ -53,7 +53,7 @@ object KLox {
         resolver.resolve(statements)
 
         // Stop if there was a resolution error
-        if (hadError) return;
+        if (hadError) return
 
         interpreter.interpret(statements)
     }

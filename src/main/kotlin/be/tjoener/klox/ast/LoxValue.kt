@@ -109,7 +109,7 @@ class LoxInstance(val klass: LoxClass) : LoxValue() {
     }
 
     fun set(name: Token, value: LoxValue) {
-        fields.put(name.lexeme, value)
+        fields[name.lexeme] = value
     }
 
     override fun toString() = "${klass.name} instance"

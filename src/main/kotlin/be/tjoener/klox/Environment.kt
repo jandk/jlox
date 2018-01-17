@@ -9,7 +9,7 @@ class Environment(val enclosing: Environment? = null) {
     private val values: MutableMap<String, LoxValue> = hashMapOf()
 
     fun define(name: String, value: LoxValue) {
-        values.put(name, value)
+        values[name] = value
     }
 
     fun get(name: Token): LoxValue {
@@ -31,7 +31,7 @@ class Environment(val enclosing: Environment? = null) {
 
     fun assign(name: Token, value: LoxValue) {
         if (values.containsKey(name.lexeme)) {
-            values.put(name.lexeme, value)
+            values[name.lexeme] = value
             return
         }
 
@@ -44,7 +44,7 @@ class Environment(val enclosing: Environment? = null) {
     }
 
     fun assignAt(distance: Int, name: Token, value: LoxValue) {
-        ancestor(distance).values.put(name.lexeme, value)
+        ancestor(distance).values[name.lexeme] = value
     }
 
     fun ancestor(distance: Int): Environment {
