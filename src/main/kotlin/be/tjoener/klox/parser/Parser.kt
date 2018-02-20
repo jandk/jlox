@@ -331,6 +331,13 @@ class Parser(private val tokens: List<Token>) {
         if (match(NUMBER)) return Literal(previous().literal)
         if (match(STRING)) return Literal(previous().literal)
 
+        if (match(SUPER)) {
+            val keyword = previous()
+            consume(DOT, "Expect '.' after 'super'")
+            val method = consume(IDENTIFIER, "Expect superclass method name")
+            return Super(keyword, method)
+        }
+
         if (match(THIS)) return This(previous())
 
         if (match(IDENTIFIER)) return Variable(previous())

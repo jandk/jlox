@@ -13,7 +13,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
     }
 
     private enum class ClassType {
-        NONE, CLASS
+        NONE, CLASS, SUBCLASS
     }
 
     private val scopes = Stack<MutableMap<String, Boolean>>()
@@ -41,7 +41,10 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         currentClass = ClassType.CLASS
 
         if (stmt.superclass != null) {
+            currentClass = ClassType.SUBCLASS
             resolve(stmt.superclass)
+            beginScope()
+            scopes.peek()["super"] = true
         }
 
         beginScope()
@@ -56,6 +59,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         }
 
         endScope()
+        if (stmt.superclass != null) endScope()
         currentClass = enclosingClass
     }
 
@@ -145,6 +149,16 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
     override fun visitSetExpr(expr: Set) {
         resolve(expr.value)
         resolve(expr.obj)
+    }
+
+    override fun visitSuperExpr(expr: Super) {
+        if (currentClass == ClassType.NONE) {
+            KLox.error(expr.keyword, "Cannot use 'super' outside of a class")
+        } else if (currentClass != ClassType.SUBCLASS) {
+            KLox.error(expr.keyword, "Cannot use 'super' in a class with no superclass")
+        }
+
+        resolveLocal(expr, expr.keyword)
     }
 
     override fun visitThisExpr(expr: This) {
