@@ -39,6 +39,12 @@ class Parser(private val tokens: List<Token>) {
 
     private fun classDeclaration(): Stmt {
         val name = consume(IDENTIFIER, "Expect class name")
+
+        val superclass = if (match(LESS)) {
+            consume(IDENTIFIER, "Expect superclass name")
+            Variable(previous())
+        } else null
+
         consume(LEFT_BRACE, "Expect '{' before class body")
 
         val methods = mutableListOf<Function>()
@@ -47,16 +53,15 @@ class Parser(private val tokens: List<Token>) {
         }
 
         consume(RIGHT_BRACE, "Expect '}' after class body")
-        return Class(name, methods)
+        return Class(name, superclass, methods)
     }
 
     private fun varDeclaration(): Stmt {
         val name = consume(IDENTIFIER, "Expect variable name")
 
-        var initializer: Expr? = null
-        if (match(EQUAL)) {
-            initializer = expression()
-        }
+        val initializer = if (match(EQUAL)) {
+            expression()
+        } else null
 
         consume(SEMICOLON, "Expect ';' after variable declaration")
         return Var(name, initializer)

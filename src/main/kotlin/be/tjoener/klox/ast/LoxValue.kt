@@ -72,7 +72,7 @@ class LoxFunction(
     }
 }
 
-class LoxClass(val name: String, val methods: Map<String, LoxFunction>) : LoxCallable() {
+class LoxClass(val name: String, val superclass: LoxClass?, val methods: Map<String, LoxFunction>) : LoxCallable() {
     override val arity: Int
         get() = methods["init"]?.arity ?: 0
 

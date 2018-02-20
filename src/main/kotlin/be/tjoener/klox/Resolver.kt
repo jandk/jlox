@@ -39,6 +39,11 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
         val enclosingClass = currentClass
         currentClass = ClassType.CLASS
+
+        if (stmt.superclass != null) {
+            resolve(stmt.superclass)
+        }
+
         beginScope()
 
         scopes.peek()["this"] = true
