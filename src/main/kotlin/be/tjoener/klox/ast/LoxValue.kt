@@ -85,7 +85,16 @@ class LoxClass(val name: String, val superclass: LoxClass?, val methods: Map<Str
     }
 
     fun findMethod(instance: LoxInstance, name: String): LoxFunction? {
-        return methods[name]?.bind(instance)
+        val function = methods[name]
+        if (function != null) {
+            return function.bind(instance)
+        }
+
+        if (superclass != null) {
+            return superclass.findMethod(instance, name)
+        }
+
+        return null
     }
 
     override fun toString() = name
